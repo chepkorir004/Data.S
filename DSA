@@ -1,0 +1,84 @@
+BRENDA CHEPKORIR SCT222-0348/2022
+FONCIE NKIROTE SCT222-0317/2022
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+    int data;
+    struct Node *left;
+    struct Node *right;
+} Node;
+
+Node *createNode(int data) {
+    Node *newNode = (Node *)malloc(sizeof(Node));
+    if (newNode == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+int search(int arr[], int start, int end, int value) {
+    int i;
+    for (i = start; i <= end; i++) {
+        if (arr[i] == value)
+            return i;
+    }
+    return -1;
+}
+
+Node *bst_construct(int in[], int post[], int inStart, int inEnd, int *postIndex) {
+    if (inStart > inEnd) // Base case
+        return NULL;
+
+    Node *root = createNode(post[(*postIndex)--]);
+
+    if (inStart == inEnd) // If this node has no children
+        return root;
+
+    int inIndex = search(in, inStart, inEnd, root->data);
+
+    root->right = bst_construct(in, post, inIndex + 1, inEnd, postIndex);
+
+    root->left = bst_construct(in, post, inStart, inIndex - 1, postIndex);
+
+    return root;
+}
+
+void BFS(Node *root) {
+    if (root == NULL)
+        return;
+
+    Node *queue[100]; // Assuming maximum 100 nodes
+    int front = -1, rear = -1;
+    queue[++rear] = root;
+
+    while (front != rear) {
+        Node *current = queue[++front];
+        printf("%d ", current->data);
+
+        if (current->left != NULL)
+            queue[++rear] = current->left;
+        if (current->right != NULL)
+            queue[++rear] = current->right;
+    }
+}
+
+int main() {
+    int inOrder[] = {5, 10, 15, 20, 25, 30, 45};
+    int postOrder[] = {5, 15, 10, 25, 45, 30, 20};
+    int n = sizeof(inOrder) / sizeof(inOrder[0]);
+
+    int postIndex = n - 1; // Index of the last element in post-order traversal
+
+    Node *root = bst_construct(inOrder, postOrder, 0, n - 1, &postIndex);
+
+    printf("Breadth-first traversal: ");
+    BFS(root);
+
+    return 0;
+}
